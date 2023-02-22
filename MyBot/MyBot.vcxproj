@@ -224,6 +224,7 @@
     <ClInclude Include="dependencies\include\dpp-10.0\dpp\webhook.h" />
     <ClInclude Include="dependencies\include\dpp-10.0\dpp\win32_safe_warnings.h" />
     <ClInclude Include="dependencies\include\dpp-10.0\dpp\wsclient.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="NumberGenerator.h" />
     <ClInclude Include="MyBot.h" />
   </ItemGroup>
