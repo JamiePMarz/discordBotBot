@@ -2,6 +2,7 @@
 #include <dpp/dpp.h>
 #include "NumberGenerator.h"
 #include <string>
+#include <iostream>
 
 /* Be sure to place your token in the line below.
  * Follow steps here to get a token:
@@ -10,10 +11,11 @@
  * scopes 'bot' and 'applications.commands', e.g.
  * https://discord.com/oauth2/authorize?client_id=940762342495518720&scope=bot+applications.commands&permissions=139586816064
  */
-const std::string    BOT_TOKEN    = "MTA3NzAxOTkwMDYxNjM5NjkyMA.GXJRsg.L1eOwFDAzYgqjhYgIHOPZbK-C2UiwmB80mgdJI";
 
+const std::string    BOT_TOKEN    = "MTA3NzAxOTkwMDYxNjM5NjkyMA.G0GsT7.di7lPbEvQNRPuos-cvPXICB6uT2aDA-l9JCC_Q";
 //invite code = https://discord.com/api/oauth2/authorize?client_id=1077019900616396920&permissions=8&scope=bot%20applications.commands
-// my id    = dpp::snowflake id = 137505549125287936;
+
+const dpp::snowflake BOT_ID = 1077019900616396920;
 const dpp::snowflake MY_ID = 137505549125287936;
 
 int main()
@@ -41,16 +43,32 @@ int main()
         if (event.command.get_command_name() == "pi") {
             if (event.command.member.user_id == MY_ID) {
                 std::string saythis = std::get<std::string>(event.get_parameter("query"));
-                dpp::snowflake channel_id = event.command.get_channel().id;
-                dpp::message msg(channel_id,saythis);
+                dpp::message msg(event.command.get_channel().id, saythis);
                 bot.message_create(msg);
-                dpp::message eph(channel_id, "Forward:");
-                eph.set_flags(dpp::m_ephemeral);
-                event.reply(eph);
                 return;
             }
             std::string q = std::get<std::string>(event.get_parameter("query"));
             event.reply(q + ": coming soon!");
+        }
+
+        if (event.command.get_command_name() == "anyone") {
+
+            std::string image_url = "https://cdn.discordapp.com/attachments/423284615235502106/1076115294499643452/image.png";
+            
+
+            bot.request(image_url, dpp::m_get, [&event, &bot](const dpp::http_request_completion_t& httpRequestCompletion) {
+                if (httpRequestCompletion.status == 200) {
+                    dpp::message msg;
+                    msg.channel_id = event.command.get_channel().id;
+                    msg.add_file("image.png", httpRequestCompletion.body);
+                    bot.message_create(msg);
+                } 
+                else
+                    LOG("request incomplete");
+
+            });
+
+            event.reply("...");
         }
     });
 
@@ -70,7 +88,7 @@ int main()
             "Hello there! How may I be of assistance? :]";
 
         dpp::message msg(1077109197331759166, ready);
-        bot.message_create(msg);
+        //bot.message_create(msg);
 		
         /* Wrap command registration in run_once to make sure it doesnt run on every full reconnection */
         if (dpp::run_once<struct register_bot_commands>()) {
@@ -81,6 +99,7 @@ int main()
             bot.global_command_create(dpp::slashcommand("pi", "Ask me anything", bot.me.id)
                 .add_option(dpp::command_option(dpp::co_string, "query", "I know everything", true))
             );
+            bot.global_command_create(dpp::slashcommand("anyone", "Is anyone on tonight?", bot.me.id));
             //bot.global_command_delete(1077155338593243196);
         }
     });
